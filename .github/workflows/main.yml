@@ -10,14 +10,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: List workspace contents for debugging 'cobol-check' directory # NOVO PASSO DE DIAGNÓSTICO
+        run: |
+          echo "--- Listing contents of current workspace: ---"
+          ls -F
+          echo "--- Listing contents of cobol-check directory (if exists): ---"
+          if [ -d "cobol-check" ]; then
+            ls -F cobol-check
+          else
+            echo "Directory 'cobol-check' not found in workspace root."
+          fi
+          echo "----------------------------------------------------"
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x' # Garante compatibilidade com Zowe CLI v3.x
+          node-version: '20.x'
       - name: Install Zowe CLI
         run: npm install -g @zowe/cli
-      # O passo "Configure Zowe CLI Profile" foi REMOVIDO.
-      # As credenciais serão passadas via variáveis de ambiente Zowe CLI.
       - name: Set up Java
         uses: actions/setup-java@v2
         with:
@@ -27,12 +36,11 @@ jobs:
         env:
           ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
-          # Variáveis de ambiente específicas do Zowe CLI para o serviço zosmf
           ZOWE_ZOSMF_HOST: ${{ secrets.ZOWE_HOST }}
           ZOWE_ZOSMF_PORT: ${{ secrets.ZOWE_PORT }}
-          ZOWE_ZOSMF_USER: ${{ secrets.ZOWE_USERNAME }} # O Zowe CLI usará isso
-          ZOWE_ZOSMF_PASSWORD: ${{ secrets.ZOWE_PASSWORD }} # O Zowe CLI usará isso
-          ZOWE_ZOSMF_REJECT_UNAUTHORIZED: false # Para lidar com certificados autoassinados ou não confiáveis
+          ZOWE_ZOSMF_USER: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_ZOSMF_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_ZOSMF_REJECT_UNAUTHORIZED: false
         run: |
           chmod +x .github/scripts/zowe_operations.sh
           .github/scripts/zowe_operations.sh
@@ -40,8 +48,6 @@ jobs:
         env:
           ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
-          # Repetir as variáveis de ambiente Zowe CLI para este passo, caso o script
-          # mainframe_operations.sh também use comandos Zowe CLI (direta ou indiretamente).
           ZOWE_ZOSMF_HOST: ${{ secrets.ZOWE_HOST }}
           ZOWE_ZOSMF_PORT: ${{ secrets.ZOWE_PORT }}
           ZOWE_ZOSMF_USER: ${{ secrets.ZOWE_USERNAME }}
