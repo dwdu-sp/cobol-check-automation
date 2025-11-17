@@ -16,8 +16,6 @@ jobs:
           node-version: '16'
       - name: Install Zowe CLI
         run: npm install -g @zowe/cli
-      # - name: Install Zowe CLI Profiles Plugin # <--- ESTE PASSO FOI REMOVIDO
-      #   run: zowe plugins install @zowe/cli-profiles
       - name: Configure Zowe CLI Profile
         env:
           ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
@@ -25,7 +23,8 @@ jobs:
           ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
           ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
         run: |
-          zowe profiles create zosmf-profile myzosmf --host $ZOWE_HOST --port $ZOWE_PORT --user $ZOWE_USERNAME --password $ZOWE_PASSWORD --reject-unauthorized false --overwrite
+          # CORREÇÃO AQUI: zosmf-profile foi alterado para zosmf
+          zowe profiles create zosmf myzosmf --host $ZOWE_HOST --port $ZOWE_PORT --user $ZOWE_USERNAME --password $ZOWE_PASSWORD --reject-unauthorized false --overwrite
       - name: Set up Java
         uses: actions/setup-java@v2
         with:
