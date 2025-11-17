@@ -9,13 +9,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3 # Usando v3 para checkout, é uma boa prática manter atualizado.
+      - uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v3 # <--- NOVO PASSO: Configura o Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: '16' # Ou uma versão compatível com Zowe CLI
+          node-version: '16'
       - name: Install Zowe CLI
-        run: npm install -g @zowe/cli # <--- NOVO PASSO: Instala o Zowe CLI globalmente
+        run: npm install -g @zowe/cli
+      - name: Configure Zowe CLI Profile # <--- NOVO PASSO: Cria o perfil Zowe CLI
+        env:
+          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
+        run: |
+          zowe profiles create zosmf-profile myzosmf --host $ZOWE_HOST --port $ZOWE_PORT --user $ZOWE_USERNAME --password $ZOWE_PASSWORD --reject-unauthorized false --overwrite
+          # --reject-unauthorized false: Pode ser necessário se o seu mainframe usa um certificado autoassinado ou não confiável.
+          # --overwrite: Garante que o perfil seja recriado se já existir.
+          # zosmf-profile: É o tipo de perfil para z/OSMF.
+          # myzosmf: É o nome que estamos dando ao nosso perfil.
       - name: Set up Java
         uses: actions/setup-java@v2
         with:
