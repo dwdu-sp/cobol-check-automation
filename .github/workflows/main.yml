@@ -10,21 +10,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Node.js
+      - name: Setup Node.js # <--- CORREÇÃO AQUI: Versão do Node.js atualizada
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
-      - name: Install Zowe CLI and Diagnose # <--- PASSO DE DIAGNÓSTICO ATUALIZADO
-        run: |
-          echo "Installing Zowe CLI..."
-          npm install -g @zowe/cli
-          echo "--- Listing globally installed npm packages: ---"
-          npm list -g --depth=0
-          echo "--- Verifying Zowe CLI version: ---"
-          zowe --version
-          echo "--- Listing Zowe CLI top-level commands (zowe --help): ---"
-          zowe --help
-          echo "--- Diagnostic steps complete. ---"
+          node-version: '20.x' # Alterado de '16' para '20.x'
+      - name: Install Zowe CLI
+        run: npm install -g @zowe/cli
       - name: Configure Zowe CLI Profile
         env:
           ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
@@ -32,8 +23,6 @@ jobs:
           ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
           ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
         run: |
-          # Este passo ainda falhará com "Unknown group: profiles"
-          # Mas agora teremos mais informações do passo anterior.
           zowe profiles create zosmf myzosmf --host $ZOWE_HOST --port $ZOWE_PORT --user $ZOWE_USERNAME --password $ZOWE_PASSWORD --reject-unauthorized false --overwrite
       - name: Set up Java
         uses: actions/setup-java@v2
