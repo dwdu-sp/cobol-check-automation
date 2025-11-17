@@ -10,20 +10,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Setup Node.js # <--- CORREÇÃO AQUI: Versão do Node.js atualizada
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x' # Alterado de '16' para '20.x'
+          node-version: '20.x' # Garante compatibilidade com Zowe CLI v3.x
       - name: Install Zowe CLI
         run: npm install -g @zowe/cli
-      - name: Configure Zowe CLI Profile
-        env:
-          ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
-          ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
-          ZOWE_HOST: ${{ secrets.ZOWE_HOST }}
-          ZOWE_PORT: ${{ secrets.ZOWE_PORT }}
-        run: |
-          zowe profiles create zosmf myzosmf --host $ZOWE_HOST --port $ZOWE_PORT --user $ZOWE_USERNAME --password $ZOWE_PASSWORD --reject-unauthorized false --overwrite
+      # O passo "Configure Zowe CLI Profile" foi REMOVIDO.
+      # As credenciais serão passadas via variáveis de ambiente Zowe CLI.
       - name: Set up Java
         uses: actions/setup-java@v2
         with:
@@ -33,6 +27,12 @@ jobs:
         env:
           ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          # Variáveis de ambiente específicas do Zowe CLI para o serviço zosmf
+          ZOWE_ZOSMF_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_ZOSMF_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_ZOSMF_USER: ${{ secrets.ZOWE_USERNAME }} # O Zowe CLI usará isso
+          ZOWE_ZOSMF_PASSWORD: ${{ secrets.ZOWE_PASSWORD }} # O Zowe CLI usará isso
+          ZOWE_ZOSMF_REJECT_UNAUTHORIZED: false # Para lidar com certificados autoassinados ou não confiáveis
         run: |
           chmod +x .github/scripts/zowe_operations.sh
           .github/scripts/zowe_operations.sh
@@ -40,6 +40,13 @@ jobs:
         env:
           ZOWE_USERNAME: ${{ secrets.ZOWE_USERNAME }}
           ZOWE_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          # Repetir as variáveis de ambiente Zowe CLI para este passo, caso o script
+          # mainframe_operations.sh também use comandos Zowe CLI (direta ou indiretamente).
+          ZOWE_ZOSMF_HOST: ${{ secrets.ZOWE_HOST }}
+          ZOWE_ZOSMF_PORT: ${{ secrets.ZOWE_PORT }}
+          ZOWE_ZOSMF_USER: ${{ secrets.ZOWE_USERNAME }}
+          ZOWE_ZOSMF_PASSWORD: ${{ secrets.ZOWE_PASSWORD }}
+          ZOWE_ZOSMF_REJECT_UNAUTHORIZED: false
         run: |
           chmod +x .github/scripts/mainframe_operations.sh
           .github/scripts/mainframe_operations.sh
